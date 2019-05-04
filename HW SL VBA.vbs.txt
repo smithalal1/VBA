@@ -1,0 +1,155 @@
+Option Explicit
+Sub CreateUniqueTicker()
+  ' The ticker symbol.
+
+Dim lstRow As Long
+
+Cells(1, "I").Value = "Ticker"
+Cells(1, "J").Value = "Stock Volume"
+
+'Find the last non-blank cell in column A(1)
+lstRow = Cells(Rows.Count, "A").End(xlUp).Row
+
+    ActiveSheet.Range("A2:A" & lstRow).AdvancedFilter _
+    Action:=xlFilterCopy, _
+    CopyToRange:=ActiveSheet.Range("I2"), _
+    Unique:=True
+
+End Sub
+
+Sub CreateTotalVolume()
+'The total stock volume of the stock.
+
+Dim lstRow As Long
+Dim lstCol As Long
+
+    'Find the last non-blank cell in column A(1)
+        lstRow = Cells(Rows.Count, 1).End(xlUp).Row
+    'Find the last non-blank cell in row 1
+        lstCol = Cells(1, Columns.Count).End(xlToLeft).Column
+'    MsgBox "Last Row: " & lstRow & vbNewLine & _
+'            "Last Column: " & lstCol
+
+Dim RowTracker As Long
+Dim StockVolume As Double ' using Long caused "stack overflow"
+Dim TkrTracker As Long
+Dim lstTicker As Long
+
+
+    lstTicker = Cells(Rows.Count, "I").End(xlUp).Row
+
+For TkrTracker = 2 To lstTicker
+    For RowTracker = 2 To lstRow
+         If Cells(RowTracker, 1).Value = Cells(TkrTracker, "I") Then
+             StockVolume = StockVolume + Cells(RowTracker, "G")
+         End If
+    Next RowTracker
+
+Cells(TkrTracker, "J").Value = StockVolume
+
+StockVolume = 0
+
+Next TkrTracker
+
+Columns("I:Q").EntireColumn.AutoFit
+
+End Sub
+
+Sub CreateYearlyChange()
+'Yearly change from opening price at the beginning of a given year to the closing price at the end of that year.
+'borrowed from another developer
+
+Dim DateMinOpen As Variant
+Dim DateMaxClose As Variant
+Dim i As Double
+Dim x As Double
+Dim lstRow As Long
+
+Cells(1, "K").Value = "Yearly Change"
+Cells(1, "L").Value = "Percent Change"
+
+    x = 2
+    i = 2
+
+Cells(x, "I").Value = Cells(x, 1).Value
+
+DateMinOpen = Cells(i, 3).Value
+lstRow = Cells(Rows.Count, 1).End(xlUp).Row
+
+For i = 2 To lstRow
+
+'''end setup''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+If Cells(i, 1).Value = Cells(x, "I").Value Then
+DateMaxClose = Cells(i, 6).Value
+Else
+  
+
+'calculated fields''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Cells(x, "K").Value = DateMaxClose - DateMinOpen
+
+                If DateMaxClose <= 0 Then
+                Cells(x, "L").Value = 0
+                Else
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                    Cells(x, "L").Value = (DateMaxClose / DateMinOpen) - 1
+                    
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                End If
+                Cells(x, "L").Style = "Percent"
+            If Cells(x, "K").Value >= 0 Then
+                Cells(x, "K").Interior.ColorIndex = 4
+                    Else
+                Cells(x, "K").Interior.ColorIndex = 3
+            End If
+                
+'reset variables''''''''''''''''''''''''''''''''''''''''''''''''
+DateMinOpen = Cells(i, 3).Value
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+x = x + 1
+Cells(x, "I").Value = Cells(i, 1).Value
+End If
+
+Next i
+
+'calculated fields final''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Cells(x, "K").Value = DateMaxClose - DateMinOpen
+
+                If DateMaxClose <= 0 Then
+                    Cells(x, "L").Value = 0
+                Else
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                    Cells(x, "L").Value = (DateMaxClose / DateMinOpen) - 1
+                    
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                End If
+                    Cells(x, "L").Style = "Percent"
+            If Cells(x, "K").Value >= 0 Then
+                Cells(x, "K").Interior.ColorIndex = 4
+                    Else
+                Cells(x, "K").Interior.ColorIndex = 3
+            End If
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+'resize''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Columns("I:L").EntireColumn.AutoFit
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Cells(1, 1).Select
+
+
+'        'Set range from which to determine smallest * largest value
+'         Set Rng = ActiveSheet.Range("B2:B" & lstTicker)
+'         'Worksheet function MIN returns the smallest value and MAX returns largest in a range
+'         Min = Application.WorksheetFunction.Min(Rng)
+'         Max = Application.WorksheetFunction.Max(Rng)
+
+
+End Sub
+
+Sub CreateYearlyPercentageChange()
+'The percent change from opening price at the beginning of a given year to the closing price at the end of that year.
+
+
+End Sub
+
+,Your solution will also be able to return the stock with the "Greatest % increase", "Greatest % Decrease" and "Greatest total volume".
